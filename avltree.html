@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/react/0.14.6/react.js"></script>
+    		<script src="https://cdnjs.cloudflare.com/ajax/libs/react/0.14.6/react-dom.js"></script>
+    		<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.23/browser.js"></script>
+		<title>AVL tree with recursive React components</title>
+		<style>
+			#app {
+				min-width: 100%;
+			}
+			.tree-container{
+				min-width: 100%;
+				display: flex;
+				flex-direction: column;
+				justify-content: space-between;
+				align-items: center;
+				position: absolute;
+			}
+
+			.button-container{
+				display: flex;
+				flex-direction: column;
+				min-width: 25%;
+				justify-content: space-between;
+				align-items: center;
+				padding: 10px;
+			}
+
+			.buttons {
+				flex: 1;
+				width: inherit;
+				height: inherit;
+				display: flex;
+				flex-direction: column;
+				justify-content: center;
+				text-align: center
+			}
+			
+			.empty-component{
+				min-height: 20px;
+				width: inherit;
+				flex: 1;
+			}
+			
+			.tree-component{
+				min-height: 20px;
+				border: 1px solid black;
+				padding: 2px;
+				margin: 2px;
+				width: inherit;
+				display: flex;
+				flex-direction: column;
+				justify-content: space-between;
+				align-items: center;
+				flex: 1;
+				background-color: white;
+			}
+
+			.green {
+				border-top: 4px solid #98ff98;
+			}
+
+			.value {
+				min-height: 20px;
+				font-size: 20px;
+			}
+
+			.height {
+				color: blue;
+				font-size: 10px;
+			}
+
+			.child-container{
+				flex: 1;
+				width: 100%;
+				display: flex;
+				flex-direction: row;
+				justify-content: space-between;
+			}
+		</style>
+	</head>
+
+	<body>
+		<div id="app"></div>
+	</body>
+
+	<script type="text/babel">
+		// Recursive AVL tree data structure		
+		class Tree {
+			constructor(value, left, right) {
+				if (value == null || value == undefined) {
+					throw new Error ("Input undefined or null");
+				}
+				this.value = value;
+				this.left = (left || null);
+				this.right = (right || null);
+			}
+		}
+		
+		// get height of tree
+		function getHeight(tree) {
+			if (tree == null) {
+				return 0;
+			}
+			else {
+				return 1 + Math.max(getHeight(tree.left), getHeight(tree.right));
+			}
+		}
+		
+		// check if AVL tree is balanced (difference between left and right height <= 1)
+		function isBalanced(tree) {
+			if (tree.left == null && tree.right == null) {
+				return true;
+			}
+			else if (tree.left == null) {
+				return getHeight(tree.right) <= 1;
+			}
+			else if (tree.right == null) {
+				return getHeight(tree.left) <= 1;
+			}
+			else {
+				return Math.abs(getHeight(tree.left) - getHeight(tree.right)) <= 1;
+			}
+		}
+
+		// helper function to insert new value then rebalance tree
+		function insertValIntoTree (val, tree) {
+			if (val == null || val == undefined) {
+				throw new Error("Value undefined");
+			}
+			else {
+				if (tree == null) {
+					tree = new Tree(val, null, null);
+				}
+				else {
+					if (val < tree.value) {
+						tree.left = insertValIntoTree(val, tree.left);
+					}
+					else if (val > tree.value) {
+						tree.right = insertValIntoTree(val, tree.right);
+					}
+				}
+			}
+			return rebalanceTree(tree);
+			
+		}
+		
+		// checks if rebalancing is needed and which case if so
+		function rebalanceTree(tree) {
+			if (!isBalanced(tree)) {
+				if (getHeight(tree.left) > getHeight(tree.right)) {
+					if (leftLeftCase(tree)) {
+						tree = rotateRight(tree);
+					}
+					else {
+						tree.left = rotateLeft(tree.left);
+						tree = rotateRight(tree);
+					}
+				}
+						
+				else if (getHeight(tree.right) > getHeight(tree.left)) {
+					if (rightRightCase(tree)) {
+						tree = rotateLeft(tree);
+					}
+					else {
+						tree.right = rotateRight(tree.right);
+						tree = rotateLeft(tree);
+					}
+				}
+			}
+			return tree;
+		}
+		
+		// performs single left rotation
+		function rotateLeft(tree) {
+			let newValue = tree.right.value;
+			let newLeft = new Tree (tree.value, tree.left, tree.right.left);
+			let newRight = tree.right.right;
+			tree.value = newValue;
+			tree.left = newLeft;
+			tree.right = newRight;
+			return tree;
+		}
+		
+		// performs single right rotation
+		function rotateRight(tree) {
+			let newValue = tree.left.value;
+			let newLeft = tree.left.left;
+			let newRight = new Tree (tree.value, tree.left.right, tree.right);
+			tree.value = newValue;
+			tree.left = newLeft;
+			tree.right = newRight;
+			return tree;
+		}
+		
+		// check if left-left case is present
+		function leftLeftCase(tree) {
+			return getHeight(tree.left.left) > getHeight(tree.left.right);
+		}
+		
+		// check if right-right case is present
+		function rightRightCase(tree) {
+			return getHeight(tree.right.right) > getHeight(tree.right.left);
+		}
+		
+		// check if value exists in tree
+		function traceVal(tree, value) {
+				return contains(tree, value);
+		}
+
+		// recursive helper to check if value exists in tree
+		function contains(tree, value) {
+			if (tree == null) {
+				return false;
+			}
+			else if (value == null || value == undefined || value == "") {
+				return false;
+			}
+			else {
+				if (tree.value == value) {
+					return true;
+				}
+				else {
+					return (contains(tree.left, value) || contains(tree.right, value));
+				}
+			}
+		}
+		
+		
+		// React component representing empty tree
+		let EmptyComponent = React.createClass({
+			render() {
+				return (
+					<div className="empty-component">
+					</div>
+				)
+			}		
+		});
+		
+		// React component representing tree
+		let TreeComponent = React.createClass({
+			render() {
+				let value;
+				let height = getHeight(this.props.tree);
+				let left = <EmptyComponent/>;
+				let right = <EmptyComponent/>;
+				if (this.props.tree) {
+					value = this.props.tree.value;
+					if (this.props.tree.left) {
+						left = <TreeComponent tree={this.props.tree.left} traceVal={this.props.traceVal}/>
+					}
+					if (this.props.tree.right) {
+						right = <TreeComponent tree={this.props.tree.right} traceVal={this.props.traceVal}/>
+					}
+				}
+				let componentClass = "tree-component ";
+				if (traceVal(this.props.tree, this.props.traceVal)) {
+					componentClass += "green";
+				}
+				return (
+					<div className={componentClass}>
+						<div className="value">{value}</div>
+						<div className="height">H: {height}</div>
+						<div className="child-container">
+							{left}
+							{right}
+						</div>
+					</div>
+				)
+			}		
+		});
+		
+		// React component containing tree and tree state
+		let TreeContainer = React.createClass({
+			getInitialState() {
+				return {tree: null, currentValue: "", traceVal: ""}
+			},
+			render() {
+				return (
+					<div className="tree-container">
+						<TreeComponent tree={this.state.tree} traceVal={this.state.traceVal}/>
+						<div className = "button-container">
+							<div className="buttons">
+								<p>Insert a single value</p>
+								<input onChange={this.editCurrentValue} value={this.state.currentValue || ""}></input>
+								<button onClick={this.addValue}>Add value</button>
+							</div>
+							<div className="buttons">
+								<p>Insert random integers between 0 and 100</p>
+								<button onClick={this.generateValues}>Generate</button>
+							</div>
+							<div className ="buttons">
+								<p>Search for a value in tree</p>
+								<input onChange={this.editTraceVal} value={this.state.traceVal || ""}></input>
+							</div>
+						</div>
+						
+					</div>
+				)
+			},
+			generateValues() {
+				let self= this;
+				let loops = 500;
+				let generate = function(loopsRemaining) {
+					let loopsLeft = loopsRemaining-1;
+					setTimeout(function() {
+						let randInt = Math.floor(Math.random()*100);
+						let oldTree = self.state.tree;
+						let newTree = insertValIntoTree(randInt, oldTree);
+						self.setState({tree: newTree, currentValue: ""});
+						if (loopsLeft > 0) {
+							generate(loopsLeft);
+						}
+					}, 50);
+				}
+				generate(loops);
+			},
+			addValue(event) {
+				if (!isNaN(parseInt(this.state.currentValue)) && this.state.currentValue != "") {
+					let oldTree = this.state.tree;
+					let newTree = insertValIntoTree(parseInt(this.state.currentValue), oldTree);
+					this.setState({tree: newTree, currentValue: ""});
+				}
+			},
+			editCurrentValue(event){
+				this.setState({currentValue: event.target.value});
+			},
+			editTraceVal(event) {
+				this.setState({traceVal: event.target.value});
+			}
+		});
+		
+		ReactDOM.render(<TreeContainer/>, document.getElementById('app'));
+	</script>
+	
+</html>
