@@ -5,7 +5,11 @@ These trees are staples of algorithms and data structures courses. They involve 
 
 Using the files:
 
-Both HTML files are self-contained, you just need to create a new html file and copy over the code into it - but you need to be connected to the internet as they will fetch some libraries from a CDN.
+Just open the raw html files using the following links:
+
+https://rawgit.com/tomswales/recursivereact/master/avltree.html
+
+https://rawgit.com/tomswales/recursivereact/master/unbalancedbst.html
 
 Unbalanced binary search tree:
 
